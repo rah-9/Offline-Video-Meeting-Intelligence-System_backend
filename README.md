@@ -54,3 +54,37 @@ The backend leverages multiple models sequentially (pipeline structure):
    ```
 
 **Hardware Warning:** On your first run, the system will download the AI models to your local cache. Running all models simultaneously requires a minimum of **4GB - 8GB of RAM**. If available, install PyTorch with CUDA support for significantly faster processing.
+
+## Deploying on Hugging Face Spaces
+This backend supports deployment as a **Docker Space**. The existing `Dockerfile` is already configured to expose port **7860** and install all dependencies.
+
+### Steps to publish
+1. **Authenticate with the Hugging Face CLI**:
+   ```powershell
+   powershell -ExecutionPolicy ByPass -c "irm https://hf.co/cli/install.ps1 | iex"
+   hf login    # paste your access token (write permissions)
+   ```
+
+2. **Create a new Space or use an existing one** on the website.
+3. **Add the Space remote** to this repository (replace `<username>`/`<repo>`):
+   ```bash
+   git remote add hf https://huggingface.co/spaces/<username>/<repo>
+   ```
+
+4. **Push the code** to the Space:
+   ```bash
+   git push hf main
+   ```
+   When prompted for a password, use your access token.
+
+5. Once the build completes, the Space will be live and listening on port **7860**.
+
+> **Tip:** Customize the `README.md` on the Space to set emoji, colors, or description; the file here will be copied when you push.
+
+### Notes
+* The `requirements.txt` already contains all necessary packages (FastAPI, Uvicorn, AI libraries, etc.).
+* The `Dockerfile` in this repo uses a slim Python image, installs `ffmpeg`, and sets cache directories appropriately for Spaces.
+* You can test the build locally with `docker build -t sis-backend . && docker run -p 7860:7860 sis-backend` before pushing.
+
+After pushing, allow a few minutes for HF to build and start your Space. Monitor logs via the Hugging Face web UI.
+
